@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agri-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agri}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agri_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-agri_intelligence}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agri}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: agri-backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-agri}:${POSTGRES_PASSWORD:-agri_pass}@postgres:5432/${POSTGRES_DB:-agri_intelligence}
+      SECRET_KEY: ${SECRET_KEY:-please-change-this-secret}
+      FRONTEND_ORIGIN: http://localhost:3000
+      MOCK_DISEASE_MODEL: ${MOCK_DISEASE_MODEL:-true}
+      SEED_DEMO_DATA_ON_STARTUP: ${SEED_DEMO_DATA_ON_STARTUP:-true}
+      RAGFLOW_ENABLED: ${RAGFLOW_ENABLED:-false}
+      RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL:-}
+      RAGFLOW_API_KEY: ${RAGFLOW_API_KEY:-}
+      RAGFLOW_DATASET_IDS: ${RAGFLOW_DATASET_IDS:-}
+      RAGFLOW_CHAT_ID: ${RAGFLOW_CHAT_ID:-}
+      RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS:-8}
+      RAGFLOW_STATUS_TIMEOUT_SECONDS: ${RAGFLOW_STATUS_TIMEOUT_SECONDS:-6}
+      RAGFLOW_VERIFY_SSL: ${RAGFLOW_VERIFY_SSL:-true}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./knowledge_base:/app/knowledge_base
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    container_name: agri-frontend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

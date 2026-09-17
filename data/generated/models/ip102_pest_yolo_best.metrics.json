@@ -1,0 +1,20 @@
+{
+  "model": "YOLO11n",
+  "model_version": "yolo-ip102-v1",
+  "dataset": "IP102 official Detection VOC",
+  "dataset_source": "https://github.com/xpwu95/IP102",
+  "classes": 102,
+  "train_images": 15177,
+  "test_images": 3798,
+  "train_boxes": 17838,
+  "test_boxes": 4444,
+  "epochs": 15,
+  "imgsz": 320,
+  "batch": 64,
+  "device": "0",
+  "map50": 0.4133,
+  "map50_95": 0.2597,
+  "precision": 0.4761,
+  "recall": 0.4572,
+  "note": "测试指标来自 IP102 官方 test.txt；不代表山东本地田间泛化准确率，正式部署前需使用本地样本复测。"
+}

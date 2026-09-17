@@ -1,0 +1,17 @@
+{
+  "model": "YOLO11n",
+  "dataset": "PlantDoc Object Detection Dataset",
+  "dataset_source": "https://github.com/pratikkayal/PlantDoc-Object-Detection-Dataset",
+  "license": "CC BY 4.0",
+  "train_images": 2330,
+  "val_images": 236,
+  "train_boxes": 8436,
+  "val_boxes": 452,
+  "classes": 29,
+  "device": "cuda:0",
+  "map50": 0.6542,
+  "map50_95": 0.5212,
+  "precision": 0.6068,
+  "recall": 0.6151,
+  "warning": "指标来自公开 PlantDoc 验证集，不代表山东本地田间泛化能力；上线前需使用本地标注数据复测。"
+}

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    # PostgreSQL is intentionally private to the Compose network. The host's
+    # 5432 is already used by another service on the deployment machine.
+    ports: !override []
+
+  backend:
+    environment:
+      FRONTEND_ORIGIN: http://47.105.74.222:3001
+      RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS:-35}
+      RAGFLOW_STATUS_TIMEOUT_SECONDS: ${RAGFLOW_STATUS_TIMEOUT_SECONDS:-12}
+    ports: !override ["8003:8000"]
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://47.105.74.222:8003
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://47.105.74.222:8003
+    ports: !override ["3001:3000"]

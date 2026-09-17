@@ -1,0 +1,82 @@
+# 大数据批处理环境：Spark Standalone 集群 + 作业提交入口
+#
+# 与 docker-compose.yml（数据库 / 后端 / 前端）相互独立，可单独启停，
+# 不会影响在线业务容器。Windows 下使用本文件即可运行 Spark，
+# 无需安装 Hadoop winutils。
+#
+# 用法：
+#   1) 生成 ODS 明细层（宿主机执行一次）
+#      python scripts/generate_bigdata_layer.py
+#   2) 启动集群
+#      docker compose -f docker-compose.bigdata.yml up -d spark-master spark-worker
+#   3) 提交 ETL 主链路作业
+#      docker compose -f docker-compose.bigdata.yml run --rm spark-submit
+#   4) 查看 Spark Web UI： http://localhost:8080
+#   5) 结果： data/lake/ads/*.json 与 data/lake/_run_report.json
+
+services:
+  spark-master:
+    image: bitnami/spark:3.5
+    container_name: agri-spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "8080:8080"   # Spark Master Web UI
+      - "7077:7077"   # Spark Master RPC
+    volumes:
+      - ./data:/opt/agri/data
+      - ./batch_jobs:/opt/agri/batch_jobs
+
+  spark-worker:
+    image: bitnami/spark:3.5
+    container_name: agri-spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=4G
+      - SPARK_WORKER_CORES=2
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    volumes:
+      - ./data:/opt/agri/data
+      - ./batch_jobs:/opt/agri/batch_jobs
+
+  # 一次性作业容器：提交 ETL 主链路后退出
+  spark-submit:
+    image: bitnami/spark:3.5
+    container_name: agri-spark-submit
+    depends_on:
+      - spark-master
+      - spark-worker
+    working_dir: /opt/agri
+    volumes:
+      - ./data:/opt/agri/data
+      - ./batch_jobs:/opt/agri/batch_jobs
+    command: >
+      spark-submit
+      --master spark://spark-master:7077
+      --driver-memory 2g
+      --executor-memory 3g
+      --total-executor-cores 2
+      /opt/agri/batch_jobs/spark_jobs/agri_etl_pipeline.py
+      --lake /opt/agri/data/lake
+
+  # 本地模式：无需先起集群，单容器跑完整链路，适合评委一键复现
+  spark-local:
+    image: bitnami/spark:3.5
+    container_name: agri-spark-local
+    working_dir: /opt/agri
+    volumes:
+      - ./data:/opt/agri/data
+      - ./batch_jobs:/opt/agri/batch_jobs
+    command: >
+      spark-submit
+      --master local[*]
+      --driver-memory 4g
+      /opt/agri/batch_jobs/spark_jobs/agri_etl_pipeline.py
+      --lake /opt/agri/data/lake

@@ -1,0 +1,12 @@
+{
+  "model": "yolo11n",
+  "dataset": "synthetic-leaf-detection-v1",
+  "train_samples": 400,
+  "val_samples": 100,
+  "device": "cuda:0",
+  "map50": 0.9515,
+  "map50_95": 0.7815,
+  "precision": 0.8638,
+  "recall": 0.9316,
+  "warning": "指标来自程序生成的合成叶片数据，不代表真实田间泛化能力。"
+}

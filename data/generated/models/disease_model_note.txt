@@ -1,0 +1,2 @@
+演示环境默认使用 disease_classifier.py 中的轻量 mock-CNN 兼容接口。
+替换真实模型时，建议使用 PyTorch EfficientNet/MobileNet，保持 PestDiseaseClassifier.predict(image_bytes) 返回结构不变。

@@ -1,0 +1,42 @@
+node_modules/
+.next/
+__pycache__/
+*.pyc
+.venv/
+.env
+*.env.local
+*.log
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+agri_intelligence.db
+
+# Large public datasets and reproducible training outputs stay outside Git.
+data/raw/
+data/lake/
+data/generated/*
+!data/generated/models/
+!data/generated/models/**
+data/generated/reports/*.html
+data/generated/reports/*.md
+data/processed/*.csv
+data/processed/*.json
+data/processed/*.parquet
+runs/
+
+# Competition submission bundles and video editing intermediates.
+submission_artifacts/
+*.mp4
+*.webm
+*.wav
+*.zip
+*.rar
+*.tar
+*.part
+
+# Ultralytics base checkpoints are downloaded automatically by training scripts.
+/yolo11n.pt
+/yolo26n.pt
+
+frontend/.next/
+frontend/node_modules/
